@@ -42,12 +42,16 @@ func (r *Room) RegisterControllerClient(client *Client) bool {
 
 // Run runs the main logic for the Room.
 func (r *Room) Run() {
+	defer func() {
+		log.Println("Shutting down room.")
+		r.shutdown()
+	}()
+
 	for {
 		select {
 		case client := <-r.unregister:
 			if r.gameClient == client {
-				r.Shutdown()
-				log.Println("Game client disconnected. Closing room...")
+				log.Println("Game client disconnected.")
 				return
 			} else if _, ok := r.controllerClients[client]; ok {
 				log.Println("Controller client disconnected.")
@@ -57,7 +61,6 @@ func (r *Room) Run() {
 		case message := <-r.controllerInput:
 			if err := r.gameClient.sendMessage(message); err != nil {
 				log.Printf("error: %v\n", err)
-				r.Shutdown()
 				return
 			}
 		}
@@ -65,7 +68,7 @@ func (r *Room) Run() {
 }
 
 // Shutdown shuts down the room, disconnecting all of the clients.
-func (r *Room) Shutdown() {
+func (r *Room) shutdown() {
 	r.gameClient.Close()
 	for client := range r.controllerClients {
 		client.Close()

@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// Client wraps a websocket connection an handles reading/writing mesasges to the connection.
 type Client struct {
 	conn *websocket.Conn
 
@@ -47,7 +48,6 @@ func (c *Client) sendMessage(message []byte) (err error) {
 	case c.send <- message:
 		return nil
 	default:
-		close(c.send)
 		return errors.New("send message called on an inactive client")
 	}
 }
@@ -56,7 +56,6 @@ func (c *Client) sendMessage(message []byte) (err error) {
 func (c *Client) readPump(broadcast chan []byte, unregister chan *Client) {
 	defer func() {
 		unregister <- c
-		c.conn.Close()
 	}()
 
 	c.conn.SetReadLimit(maxMessageSize)
@@ -70,8 +69,8 @@ func (c *Client) readPump(broadcast chan []byte, unregister chan *Client) {
 			if websocket.IsUnexpectedCloseError(
 				err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v\n", err)
-				return
 			}
+			return
 		}
 		broadcast <- message
 	}
@@ -82,7 +81,6 @@ func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.conn.Close()
 	}()
 
 	for {
@@ -95,7 +93,7 @@ func (c *Client) writePump() {
 				return
 			}
 
-			if err := c.conn.WriteMessage(websocket.BinaryMessage, message); err != nil {
+			if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
 				log.Printf("error: %v", err)
 				return
 			}
