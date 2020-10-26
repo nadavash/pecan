@@ -52,6 +52,8 @@ func serveWebsocketController(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
+	fs := http.FileServer(http.Dir("../web"))
+	http.Handle("/", fs)
 	http.HandleFunc("/ws/game", serveWebsocketGame)
 	http.HandleFunc("/ws/controller", serveWebsocketController)
 

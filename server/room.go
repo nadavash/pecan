@@ -61,7 +61,6 @@ func (r *Room) Run() {
 		case message := <-r.controllerInput:
 			if err := r.gameClient.sendMessage(message); err != nil {
 				log.Printf("error: %v\n", err)
-				return
 			}
 		}
 	}
