@@ -2,20 +2,38 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gorilla/websocket"
 )
 
-var flagAddr = flag.String("addr", ":8080", "http service address")
+var (
+	flagAddr    = flag.String("addr", ":8080", "http service address")
+	flagWebRoot = flag.String("web_root", "web/", "the root directory for web files")
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	lanIP    = getLocalIP()
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+	gameRoom *Room = nil
+)
+
+func serveIndex(w http.ResponseWriter, r *http.Request) {
+	path := filepath.Join(*flagWebRoot, "index.html.template")
+
+	tmpl, err := template.ParseFiles(path)
+	if err != nil {
+		log.Printf("Error parse template for serveIndex: %v", err)
+		return
+	}
+
+	data := struct{ IPAddress string }{lanIP}
+	tmpl.Execute(w, data)
 }
-
-var gameRoom *Room = nil
 
 func serveWebsocketGame(w http.ResponseWriter, r *http.Request) {
 	if gameRoom != nil {
@@ -54,8 +72,9 @@ func serveWebsocketController(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
-	fs := http.FileServer(http.Dir("../web"))
-	http.Handle("/", fs)
+	fs := http.FileServer(http.Dir(*flagWebRoot))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.HandleFunc("/", serveIndex)
 	http.HandleFunc("/ws/game", serveWebsocketGame)
 	http.HandleFunc("/ws/controller", serveWebsocketController)
 

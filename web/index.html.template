@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pecan Controller</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
+        <link rel="stylesheet" href="/static/index.css" />
+        <script src="/static/index.js"></script>
+    </head>
+    <body>
+        <div id="connection-view">
+            <h1>Connect to game</h1>
+            <input id="ip-address" type="text" name="ipAddress" value={{.IPAddress}} />
+            <button id="connect" class="btn">Connect</button>
+        </div>
+        <div id="loading-view" style="display: none;">
+            <h1>Loading...</h1>
+        </div>
+        <div id="controller-view" style="display: none;">
+            <h1>Pecan Controller</h1>
+            <button id="up-button" class="btn">Up</button>
+            <button id="down-button" class="btn">Down</button>
+        </div>
+    </body>
+</html>
