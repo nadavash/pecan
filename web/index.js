@@ -29,24 +29,10 @@ window.onload = () => {
     }
 
     function setViewState(activeView) {
-        const connectionView = document.getElementById("connection-view");
-        connectionView.style.display = "none";
-        const loadingView = document.getElementById("loading-view");
-        loadingView.style.display = "none";
-        const controllerView = document.getElementById("controller-view");
-        controllerView.style.display = "none";
-
-        switch (activeView) {
-            case "connection-view":
-                connectionView.style.display = "block";
-                break;
-            case "loading-view":
-                loadingView.style.display = "block";
-                break;
-            case "controller-view":
-                controllerView.style.display = "block";
-                break;
-        }
-
+        const views = ["connection-view", "loading-view", "controller-view"];
+        views.forEach((viewId) => {
+            const view = document.getElementById(viewId);
+            view.style.display = viewId === activeView ? "block" : "none";
+        });
     }
 };
