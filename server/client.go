@@ -33,7 +33,7 @@ const (
 func NewClient(conn *websocket.Conn) *Client {
 	return &Client{
 		conn: conn,
-		send: make(chan []byte),
+		send: make(chan []byte, 10),
 	}
 }
 
@@ -72,6 +72,7 @@ func (c *Client) readPump(broadcast chan []byte, unregister chan *Client) {
 			}
 			return
 		}
+		// log.Printf("Message received: %s", string(message))
 		broadcast <- message
 	}
 }

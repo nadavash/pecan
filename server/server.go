@@ -18,8 +18,8 @@ var upgrader = websocket.Upgrader{
 var gameRoom *Room = nil
 
 func serveWebsocketGame(w http.ResponseWriter, r *http.Request) {
-	log.Println("New game connected")
 	if gameRoom != nil {
+		log.Println("Game client tried connecting, but game already exists!")
 		http.Error(w, "Game client already exists.", http.StatusConflict)
 		return
 	}
@@ -28,6 +28,7 @@ func serveWebsocketGame(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error while upgrading WS connection:", err)
 		return
 	}
+	log.Println("New game connected.")
 	gameClient := NewClient(conn)
 	gameRoom = NewRoom(gameClient)
 	gameRoom.Run()
@@ -35,8 +36,8 @@ func serveWebsocketGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveWebsocketController(w http.ResponseWriter, r *http.Request) {
-	log.Println("New controller connected")
 	if gameRoom == nil {
+		log.Println("Controller tried connecting, but game is not available!")
 		http.Error(w, "Game client does not exist.", http.StatusNotFound)
 		return
 	}
@@ -45,6 +46,7 @@ func serveWebsocketController(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error while upgrading WS connection:", err)
 		return
 	}
+	log.Println("New controller connected.")
 	controllerClient := NewClient(conn)
 	gameRoom.RegisterControllerClient(controllerClient)
 }
